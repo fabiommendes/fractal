@@ -1,5 +1,6 @@
 import pyxel
 from random import choice, randint, seed, random
+from functools import lru_cache
 
 # ...
 pixels = [[False] * 256 for _ in range(256)]
@@ -10,24 +11,16 @@ def update():
     
 
 def draw():
-    pyxel.cls(pyxel.COLOR_WHITE)
-    # seed(0)
-
     # Itera sobre todos os pixels da tela, pintando de cores
     # aleatórias
-    r = 32
-    for i in range(pyxel.mouse_x - r, pyxel.mouse_x + r + 1):
-       for j in range(pyxel.mouse_y - r, pyxel.mouse_y + r + 1):
-           pyxel.pset(i, j, mandelbrot_color(i, j))
-
-    # for i in range(0, 256):
-    #     for j in range(256):
-    #         pyxel.pset(i, j, mandelbrot_color(i, j))
+    for i in range(0, 256):
+        for j in range(pyxel.frame_count % 32, 256, 32):
+            z = get_complex(i, j)
+            pyxel.pset(i, j, mandelbrot_color(z))
 
 
-def mandelbrot_color(i, j):
-    z = get_complex(i, j)
-    
+@lru_cache(512 * 512)
+def mandelbrot_color(z):
     # iteração de mandelbrot
     erro = 1
     tol = 1e-6
@@ -53,6 +46,5 @@ def get_complex(i, j):
     return complex(re, im)
 
 
-pyxel.init(256, 256)
-pyxel.mouse(True)
+pyxel.init(256, 256, fps=30)
 pyxel.run(update, draw)
