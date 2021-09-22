@@ -3,7 +3,7 @@ from random import choice, randint, seed, random
 
 # ...
 pixels = [[False] * 256 for _ in range(256)]
-
+NUM_ITER = 42
 
 def update():
     ...
@@ -15,8 +15,9 @@ def draw():
 
     # Itera sobre todos os pixels da tela, pintando de cores
     # aleatórias
-    for i in range(pyxel.mouse_x, pyxel.mouse_x + 1):
-       for j in range(pyxel.mouse_y, pyxel.mouse_y + 1):
+    r = 32
+    for i in range(pyxel.mouse_x - r, pyxel.mouse_x + r + 1):
+       for j in range(pyxel.mouse_y - r, pyxel.mouse_y + r + 1):
            pyxel.pset(i, j, mandelbrot_color(i, j))
 
     # for i in range(0, 256):
@@ -26,11 +27,25 @@ def draw():
 
 def mandelbrot_color(i, j):
     z = get_complex(i, j)
-    if pyxel.btnp(pyxel.KEY_SPACE):
-        print(z, abs(z))
-    ... # iteração de mandelbrot
-    ... # decide a cor a ser utilizada 
-    return randint(0, 15)
+    
+    # iteração de mandelbrot
+    erro = 1
+    tol = 1e-6
+    x = 0
+    n = 0
+
+    while erro > tol:
+        x_novo = x**2 + z
+        erro = abs(x - x_novo)
+        x = x_novo
+        n += 1
+
+        if abs(x) > 2:
+            return pyxel.COLOR_WHITE
+        if n > NUM_ITER:
+            return pyxel.COLOR_BLACK
+
+    return pyxel.COLOR_BLACK
 
 def get_complex(i, j):
     re = +i / 64 - 2
